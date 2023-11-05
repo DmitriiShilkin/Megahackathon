@@ -43,8 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'rest_framework',
-    'auth.apps.AuthConfig',
+    'sign.apps.SignConfig',
     'posts.apps.PostsConfig',
+    'selections.apps.SelectionsConfig',
 ]
 
 MIDDLEWARE = [
