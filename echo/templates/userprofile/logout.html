@@ -1,10 +1,9 @@
-{% extends 'main.html' %}
-
+{% extends "base.html" %}
 {% block content %}
-<h2> Вы вышли из системы </h2>
-
-<a class="btn btn-primary" href="/login/">Войти</a>
-
-<a class="btn btn-primary" href="/signup/">Регистрация</a>
-
-{% endblock %}
+    <h2>Вы вышли из своей учетной записи</h2>
+    <div class="border-top pt-3">
+        <small class="text-muted">
+            <a href="{% url 'login' %}">Войти</a>
+        </small>
+    </div>
+{% endblock content %}

@@ -34,6 +34,8 @@ ALLOWED_HOSTS = []
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -49,6 +51,9 @@ INSTALLED_APPS = [
     'posts.apps.PostsConfig',
     'accounts.apps.AccountsConfig',
     'selections.apps.SelectionsConfig',
+
+    'crispy_forms',
+    'crispy_bootstrap4'
 ]
 
 MIDDLEWARE = [
@@ -142,3 +147,8 @@ SITE_ID = 1
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+LOGIN_REDIRECT_URL = 'home'
+LOGIN_URL = 'login'

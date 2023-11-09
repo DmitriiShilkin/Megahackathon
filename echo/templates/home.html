@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+    <br><br><br><h1>{{ user.username }}</h1><br>
+
+<a class="nav-item nav-link" href="{% url 'profile' %}">Профиль</a>
+            	    <a class="nav-item nav-link" href="{% url 'logout' %}">Выход</a>
+{% endblock content %}
