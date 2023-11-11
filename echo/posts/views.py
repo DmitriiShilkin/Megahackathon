@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from .serializers import PostSerializer, CategorySerializer
 from .models import Post, Category
-from sign.models import User
+from profile.models import Profile
 
 
 # представление для категорий
@@ -28,7 +28,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             # получаем текущего авторизованного пользователя и передаем его для сериализации
-            user = User.objects.filter(user__username=request.user.username)
+            user = Profile.objects.filter(user__username=request.user.username)
 
             if user.exists():
                 serializer.save(user=user.first())
@@ -72,7 +72,7 @@ class PostViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         post = self.get_object()
 
-        if request.user == post.author__user:
+        if request.user == post.author.user:
             post.modified = datetime.datetime.now()
             serializer = PostSerializer(post, data=request.data, partial=True)
 
