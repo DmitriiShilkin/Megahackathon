@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'sign.apps.SignConfig',
     'posts.apps.PostsConfig',
-    'accounts.apps.AccountsConfig',
+    'profile.apps.ProfileConfig',
     'selections.apps.SelectionsConfig',
     'crispy_forms',
     'crispy_bootstrap4',
