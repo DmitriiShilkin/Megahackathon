@@ -3,10 +3,13 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework import routers
 
-from .views import PostViewSet
+from .views import PostViewSet, CategoryViewSet, ReviewViewSet, CommentViewSet
 
 router = routers.DefaultRouter()
 router.register(r'posts', PostViewSet, basename='post')
+router.register(r'categories', CategoryViewSet, basename='category')
+router.register(r'reviews', ReviewViewSet, basename='review')
+router.register(r'comments', CommentViewSet, basename='comment')
 
 urlpatterns = [
     path('', include(router.urls)),
