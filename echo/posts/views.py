@@ -3,8 +3,8 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
-from .serializers import PostSerializer, CategorySerializer, ReviewSerializer, CommentSerializer
-from .models import Post, Category, Ip, Review, Comment
+from .serializers import PostSerializer, CategorySerializer, ReviewSerializer, CommentSerializer, VoteSerializer
+from .models import Post, Category, Ip, Review, Comment, Vote
 from profile.models import Profile
 
 
@@ -22,7 +22,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer_context = {
             'request': request
         }
-        serializer = CategorySerializer(data=request.data, context=serializer_context)
+        serializer = self.get_serializer(data=request.data, context=serializer_context)
 
         if serializer.is_valid():
             serializer.save()
@@ -95,7 +95,7 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer_context = {
             'request': request
         }
-        serializer = PostSerializer(data=request.data, context=serializer_context)
+        serializer = self.get_serializer(data=request.data, context=serializer_context)
 
         if serializer.is_valid():
             # получаем текущего пользователя
@@ -148,7 +148,7 @@ class PostViewSet(viewsets.ModelViewSet):
         # если текущий пользователь - автор публикации
         if request.user == post.author.user:
             post.modified = datetime.datetime.now()
-            serializer = PostSerializer(post, data=request.data, partial=True)
+            serializer = self.get_serializer(post, data=request.data, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
@@ -187,7 +187,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer_context = {
             'request': request
         }
-        serializer = ReviewSerializer(data=request.data, context=serializer_context)
+        serializer = self.get_serializer(data=request.data, context=serializer_context)
 
         if serializer.is_valid():
             # получаем текущего пользователя
@@ -240,7 +240,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         # если текущий пользователь - автор отзыва
         if request.user == review.user.user:
             review.modified = datetime.datetime.now()
-            serializer = ReviewSerializer(review, data=request.data, partial=True)
+            serializer = self.get_serializer(review, data=request.data, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
@@ -266,6 +266,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             )
 
 
+# Представление для комментариев
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
@@ -278,7 +279,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer_context = {
             'request': request
         }
-        serializer = CommentSerializer(data=request.data, context=serializer_context)
+        serializer = self.get_serializer(data=request.data, context=serializer_context)
 
         if serializer.is_valid():
             # получаем текущего пользователя
@@ -331,7 +332,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         # если текущий пользователь - автор комментария
         if request.user == comment.user.user:
             comment.modified = datetime.datetime.now()
-            serializer = CommentSerializer(comment, data=request.data, partial=True)
+            serializer = self.get_serializer(comment, data=request.data, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
@@ -355,3 +356,92 @@ class CommentViewSet(viewsets.ModelViewSet):
                     'message': 'В изменении отказано.'
                 }
             )
+
+
+# Представление для голосов
+class VoteViewSet(viewsets.ModelViewSet):
+    serializer_class = VoteSerializer
+    queryset = Vote.objects.all()
+    # разрешаем только перечисленные методы
+    http_method_names = ['get', 'post', 'head', 'options']
+
+    def create(self, request, *args, **kwargs):
+        serializer_context = {
+            'request': request
+        }
+        serializer = self.get_serializer(data=request.data, context=serializer_context)
+
+        if serializer.is_valid():
+            # получаем текущего пользователя
+            user = Profile.objects.filter(user__username=request.user.username)
+
+            # если пользователь авторизован
+            if user.exists():
+                serializer.save(user=user.first())
+            else:
+                return Response(
+                    {
+                        'status': status.HTTP_400_BAD_REQUEST,
+                        'message': 'Пользователь не найден.',
+                        'id': None
+                    }
+                )
+
+            return Response(
+                {
+                    'status': status.HTTP_200_OK,
+                    'message': 'OK',
+                    'id': serializer.data['id'],
+                }
+            )
+
+        if status.HTTP_400_BAD_REQUEST:
+            return Response(
+                {
+                    'status': status.HTTP_400_BAD_REQUEST,
+                    'message': 'Bad request',
+                    'id': None,
+                    'serializer_errors': serializer.errors,
+                }
+            )
+
+        if status.HTTP_500_INTERNAL_SERVER_ERROR:
+            return Response(
+                {
+                    'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    'message': 'Internal server error',
+                    'id': None,
+                }
+            )
+
+    # Переопределяем метод patch, чтобы проверить текущего пользователя
+    # def partial_update(self, request, *args, **kwargs):
+    #     vote = self.get_object()
+    #
+    #     # если текущий пользователь - автор комментария
+    #     if request.user == vote.user.user:
+    #         vote.modified = datetime.datetime.now()
+    #         serializer = self.get_serializer(vote, data=request.data, partial=True)
+    #
+    #         if serializer.is_valid():
+    #             serializer.save()
+    #             return Response(
+    #                 {
+    #                     'state': '1',
+    #                     'message': 'Изменения успешно внесены.'
+    #                 }
+    #             )
+    #         else:
+    #             return Response(
+    #                 {
+    #                     'state': '0',
+    #                     'message': serializer.errors
+    #                 }
+    #             )
+    #     else:
+    #         return Response(
+    #             {
+    #                 'state': '0',
+    #                 'message': 'В изменении отказано.'
+    #             }
+    #         )
