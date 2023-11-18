@@ -25,11 +25,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('signup/', accounts_views.register, name='signup'),
-    path('profile/', accounts_views.profile, name='profile'),
-    path('login/', auth_views.LoginView.as_view(template_name='userprofile/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(template_name='userprofile/logout.html'), name='logout'),
-    path('', include('posts.urls')),
+    path('signup/', profile_views.register, name='signup'),
+    path('profile/', profile_views.profile, name='profile'),
+    path('login/', sigh_views.LoginView.as_view(template_name='userprofile/login.html'), name='login'),
+    path('logout/', sign_views.LogoutView.as_view(template_name='userprofile/logout.html'), name='logout'),
+    path('api/', include('posts.urls')),
 ]
 
 if settings.DEBUG:
