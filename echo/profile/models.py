@@ -1,35 +1,36 @@
-from PIL import Image
-
+from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.contrib.auth.models import User
 
 
-# функция получения пути для сохранения фотографий, чтобы было понятно, к какому instance они относятся
-def get_image_path(instance, file):
-    return f'photos/{instance}/{file}'
+class AuthUser(models.Model):
+    """ Модель пользователя на платформе
+    """
+    email = models.EmailField(max_length=150, unique=True)
+    join_date = models.DateTimeField(auto_now_add=True)
+    city = models.CharField(max_length=30, blank=True, null=True)
+    display_name = models.CharField(max_length=30, blank=True, null=True)
+    avatar = models.ImageField(
+        upload_to='',
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['jpg']), validate_size_image]
+    )
 
-
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    bio = models.TextField(null=True, blank=True, verbose_name='О себе')
-    image = models.ImageField(blank=True, null=True, upload_to=get_image_path, verbose_name='Фотография')
-    phone = models.CharField(max_length=13, blank=True, null=True, verbose_name='Телефон')
-    vk = models.CharField(max_length=50, null=True, blank=True, verbose_name='ВКонтакте')
-    telegram = models.CharField(max_length=50, null=True, blank=True, verbose_name='Telegram')
-    whatsup = models.CharField(max_length=50, null=True, blank=True, verbose_name='WhatsApp')
-    facebook = models.CharField(max_length=50, null=True, blank=True, verbose_name='Facebook')
-    twitter = models.CharField(max_length=50, null=True, blank=True, verbose_name='Twitter')
-    instagram = models.CharField(max_length=50, null=True, blank=True, verbose_name='Instagram')
+    @property
+    def is_authenticated(self):
+        """ Всегда возвращает True. Это способ узнать, был ли пользователь аутентифицированы
+        """
+        return True
 
     def __str__(self):
-        return f'{self.user.username} Profile'
+        return self.email
 
-    # def save(self, *args, **kwargs):
-    #     super(Profile, self).save(*args, **kwargs)
-    #
-    #     img = Image.open(self.image.path)
-    #
-    #     if img.height > 300 or img.width > 300:
-    #         output_size = (300, 300)
-    #         img.thumbnail(output_size)
-    #         img.save(self.image.path)
+
+class Follower(models.Model):
+    """ Модель подписчиков
+    """
+    user = models.ForeignKey(AuthUser, on_delete=models.CASCADE, related_name='owner')
+    subscriber = models.ForeignKey(AuthUser, on_delete=models.CASCADE, related_name='subscribers')
+
+    def __str__(self):
+        return f'{self.subscriber} подписан на {self.user}'
