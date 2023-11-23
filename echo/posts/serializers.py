@@ -1,6 +1,6 @@
-import datetime
-
+# import datetime
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import serializers
 
 from .models import Post, Category, Comment, Vote, Review
@@ -27,7 +27,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        depth = 1
+        # depth = 1
         fields = [
             'url',
             'id',
@@ -66,7 +66,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        depth = 1
+        # depth = 1
         fields = [
             'url',
             'id',
@@ -86,7 +86,12 @@ class ReviewSerializer(serializers.ModelSerializer):
     def create(self, validated_data, **kwargs):
         # получаем данные отзыва из валидатора
         user = validated_data.pop('user')
-        review = Review.objects.create(**validated_data, user=user)
+        post = validated_data.pop('post')
+
+        if user == post.author:
+            raise serializers.ValidationError('Создание отзывов к своим публикациям запрещено.')
+
+        review = Review.objects.create(**validated_data, user=user, post=post)
 
         return review
 
@@ -114,7 +119,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        depth = 1
+        # depth = 1
         fields = [
             'url',
             'id',
@@ -184,7 +189,7 @@ class VoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vote
-        depth = 1
+        # depth = 1
         fields = [
             'url',
             'id',
@@ -245,7 +250,7 @@ class VoteSerializer(serializers.ModelSerializer):
             # если значение поменялось like на dislike или dislike на like, записываем новое значение
             if vote.value != value:
                 vote.value = value
-                vote.modified = datetime.datetime.now()
+                vote.modified = timezone.now()
                 vote.save(update_fields=['value', 'modified'])
 
             # значение не поменялось, удаляем голос

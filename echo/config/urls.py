@@ -14,22 +14,30 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
-from django.urls import include
 from django.contrib import admin
-from django.urls import path
-from accounts import views as accounts_views
-from django.contrib.auth import views as auth_views
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from rest_framework import routers
+
+from posts.views import PostViewSet, CategoryViewSet, ReviewViewSet, CommentViewSet, VoteViewSet
+from profile.views import ProfileViewSet
+
+router = routers.DefaultRouter()
+
+router.register('profiles', ProfileViewSet, basename='profile')
+router.register('posts', PostViewSet, basename='post')
+router.register('categories', CategoryViewSet, basename='category')
+router.register('reviews', ReviewViewSet, basename='review')
+router.register('comments', CommentViewSet, basename='comment')
+router.register('votes', VoteViewSet, basename='vote')
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('signup/', profile_views.register, name='signup'),
-    path('profile/', profile_views.profile, name='profile'),
-    path('login/', sigh_views.LoginView.as_view(template_name='userprofile/login.html'), name='login'),
-    path('logout/', sign_views.LogoutView.as_view(template_name='userprofile/logout.html'), name='logout'),
-    path('api/', include('posts.urls')),
+    path('api/v1/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
 ]
 
 if settings.DEBUG:

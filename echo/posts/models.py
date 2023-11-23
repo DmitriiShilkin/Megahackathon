@@ -17,7 +17,7 @@ class Ip(models.Model):
 # Модель для категорий
 class Category(models.Model):
     name = models.CharField(max_length=32, unique=True, verbose_name='Название')
-    subscribers = models.ManyToManyField(Profile, blank=True, related_name='categories', verbose_name='Подписчики')
+    # subscribers = models.ManyToManyField(Profile, blank=True, related_name='categories', verbose_name='Подписчики')
 
     def __str__(self):
         return self.name.capitalize()
@@ -27,7 +27,7 @@ class Category(models.Model):
 class Post(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     published = models.DateTimeField(blank=True, null=True, verbose_name='Дата публикации')
-    modified = models.DateTimeField(blank=True, null=True, verbose_name='Дата измнения')
+    modified = models.DateTimeField(blank=True, null=True, verbose_name='Дата изменения')
     headline = models.CharField(verbose_name='Заголовок', max_length=254)
     text = models.TextField(
         validators=[
@@ -40,7 +40,7 @@ class Post(models.Model):
     rating = models.FloatField(default=0.0, verbose_name='Рейтинг')
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Автор')
     views = models.ManyToManyField(Ip, related_name='post_views', blank=True, verbose_name='Просмотры')
-    favourite = models.ManyToManyField(Profile, related_name='favourite_posts', blank=True, verbose_name='Избранное')
+    # favourite = models.ManyToManyField(Profile, related_name='favourite_posts', blank=True, verbose_name='Избранное')
     category = models.ManyToManyField(Category, related_name='posts', verbose_name='Категория')
 
     class Meta:

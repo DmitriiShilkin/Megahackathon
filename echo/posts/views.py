@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
@@ -28,7 +28,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(
                 {
-                    'status': status.HTTP_200_OK,
+                    'status': status.HTTP_201_CREATED,
                     'message': 'OK',
                     'id': serializer.data['id']
                 }
@@ -39,7 +39,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
                 {
                     'status': status.HTTP_400_BAD_REQUEST,
                     'message': 'Bad request',
-                    'id': None,
                     'serializer_errors': serializer.errors,
                 }
             )
@@ -49,7 +48,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
                 {
                     'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': 'Internal server error',
-                    'id': None,
                 }
             )
 
@@ -59,7 +57,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
     # добавляем фильтрацию записей по email пользователя и категории
-    filterset_fields = ('author__user__username', 'category')
+    filterset_fields = ('author__username', 'category')
     # разрешаем только перечисленные методы
     http_method_names = ['get', 'post', 'head', 'patch', 'options', 'delete']
 
@@ -99,7 +97,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             # получаем текущего пользователя
-            user = Profile.objects.filter(user__username=request.user.username)
+            user = Profile.objects.filter(username=request.user.username)
 
             # если пользователь авторизован
             if user.exists():
@@ -110,13 +108,12 @@ class PostViewSet(viewsets.ModelViewSet):
                     {
                         'status': status.HTTP_400_BAD_REQUEST,
                         'message': 'Пользователь не найден.',
-                        'id': None
                     }
                 )
 
             return Response(
                 {
-                    'status': status.HTTP_200_OK,
+                    'status': status.HTTP_201_CREATED,
                     'message': 'OK',
                     'id': serializer.data['id']
                 }
@@ -127,7 +124,6 @@ class PostViewSet(viewsets.ModelViewSet):
                 {
                     'status': status.HTTP_400_BAD_REQUEST,
                     'message': 'Bad request',
-                    'id': None,
                     'serializer_errors': serializer.errors,
                 }
             )
@@ -137,7 +133,6 @@ class PostViewSet(viewsets.ModelViewSet):
                 {
                     'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': 'Internal server error',
-                    'id': None,
                 }
             )
 
@@ -146,30 +141,50 @@ class PostViewSet(viewsets.ModelViewSet):
         post = self.get_object()
 
         # если текущий пользователь - автор публикации
-        if request.user == post.author.user:
-            post.modified = datetime.datetime.now()
+        if request.user == post.author:
+            post.modified = timezone.now()
             serializer = self.get_serializer(post, data=request.data, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
                 return Response(
-                    {
-                        'state': '1',
-                        'message': 'Изменения успешно внесены.'
-                    }
+                    # {
+                    #     'state': '1',
+                    #     'message': 'Изменения успешно внесены.'
+                    # }
+                    data=serializer.data,
+                    status=status.HTTP_200_OK,
                 )
             else:
                 return Response(
                     {
-                        'state': '0',
+                        # 'state': '0',
                         'message': serializer.errors
                     }
                 )
         else:
             return Response(
                 {
-                    'state': '0',
-                    'message': 'В изменении отказано.'
+                    # 'state': '0',
+                    'status': status.HTTP_403_FORBIDDEN,
+                    'message': 'Действие запрещено.'
+                }
+            )
+
+    # Переопределяем метод delete, чтобы проверить текущего пользователя
+    def destroy(self, request, *args, **kwargs):
+        post = self.get_object()
+
+        # если текущий пользователь - хозяин профиля
+        if request.user == post.author:
+            self.perform_destroy(post)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        else:
+            return Response(
+                {
+                    'status': status.HTTP_403_FORBIDDEN,
+                    'message': 'Действие запрещено.',
                 }
             )
 
@@ -191,24 +206,24 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             # получаем текущего пользователя
-            user = Profile.objects.filter(user__username=request.user.username)
+            user = Profile.objects.filter(username=request.user.username)
 
             # если пользователь авторизован
             if user.exists():
                 # передаем его в сериализатор
                 serializer.save(user=user.first())
+
             else:
                 return Response(
                     {
                         'status': status.HTTP_400_BAD_REQUEST,
                         'message': 'Пользователь не найден.',
-                        'id': None
                     }
                 )
 
             return Response(
                 {
-                    'status': status.HTTP_200_OK,
+                    'status': status.HTTP_201_CREATED,
                     'message': 'OK',
                     'id': serializer.data['id']
                 }
@@ -219,7 +234,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 {
                     'status': status.HTTP_400_BAD_REQUEST,
                     'message': 'Bad request',
-                    'id': None,
                     'serializer_errors': serializer.errors,
                 }
             )
@@ -229,7 +243,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 {
                     'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': 'Internal server error',
-                    'id': None,
                 }
             )
 
@@ -238,30 +251,50 @@ class ReviewViewSet(viewsets.ModelViewSet):
         review = self.get_object()
 
         # если текущий пользователь - автор отзыва
-        if request.user == review.user.user:
-            review.modified = datetime.datetime.now()
+        if request.user == review.user:
+            review.modified = timezone.now()
             serializer = self.get_serializer(review, data=request.data, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
                 return Response(
-                    {
-                        'state': '1',
-                        'message': 'Изменения успешно внесены.'
-                    }
+                    # {
+                    #     'state': '1',
+                    #     'message': 'Изменения успешно внесены.',
+                    # }
+                    data=serializer.data,
+                    status=status.HTTP_200_OK,
                 )
             else:
                 return Response(
                     {
-                        'state': '0',
+                        # 'state': '0',
                         'message': serializer.errors
                     }
                 )
         else:
             return Response(
                 {
-                    'state': '0',
-                    'message': 'В изменении отказано.'
+                    # 'state': '0',
+                    'status': status.HTTP_403_FORBIDDEN,
+                    'message': 'Действие запрещено.'
+                }
+            )
+
+    # Переопределяем метод delete, чтобы проверить текущего пользователя
+    def destroy(self, request, *args, **kwargs):
+        review = self.get_object()
+
+        # если текущий пользователь - хозяин профиля
+        if request.user == review.user:
+            self.perform_destroy(review)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        else:
+            return Response(
+                {
+                    'status': status.HTTP_403_FORBIDDEN,
+                    'message': 'Действие запрещено.',
                 }
             )
 
@@ -283,7 +316,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             # получаем текущего пользователя
-            user = Profile.objects.filter(user__username=request.user.username)
+            user = Profile.objects.filter(username=request.user.username)
 
             # если пользователь авторизован
             if user.exists():
@@ -294,13 +327,12 @@ class CommentViewSet(viewsets.ModelViewSet):
                     {
                         'status': status.HTTP_400_BAD_REQUEST,
                         'message': 'Пользователь не найден.',
-                        'id': None
                     }
                 )
 
             return Response(
                 {
-                    'status': status.HTTP_200_OK,
+                    'status': status.HTTP_201_CREATED,
                     'message': 'OK',
                     'id': serializer.data['id']
                 }
@@ -311,7 +343,6 @@ class CommentViewSet(viewsets.ModelViewSet):
                 {
                     'status': status.HTTP_400_BAD_REQUEST,
                     'message': 'Bad request',
-                    'id': None,
                     'serializer_errors': serializer.errors,
                 }
             )
@@ -321,7 +352,6 @@ class CommentViewSet(viewsets.ModelViewSet):
                 {
                     'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': 'Internal server error',
-                    'id': None,
                 }
             )
 
@@ -330,30 +360,50 @@ class CommentViewSet(viewsets.ModelViewSet):
         comment = self.get_object()
 
         # если текущий пользователь - автор комментария
-        if request.user == comment.user.user:
-            comment.modified = datetime.datetime.now()
+        if request.user == comment.user:
+            comment.modified = timezone.now()
             serializer = self.get_serializer(comment, data=request.data, partial=True)
 
             if serializer.is_valid():
                 serializer.save()
                 return Response(
-                    {
-                        'state': '1',
-                        'message': 'Изменения успешно внесены.'
-                    }
+                    # {
+                    #     'state': '1',
+                    #     'message': 'Изменения успешно внесены.'
+                    # }
+                    data=serializer.data,
+                    status=status.HTTP_200_OK,
                 )
             else:
                 return Response(
                     {
-                        'state': '0',
+                        # 'state': '0',
                         'message': serializer.errors
                     }
                 )
         else:
             return Response(
                 {
-                    'state': '0',
-                    'message': 'В изменении отказано.'
+                    # 'state': '0',
+                    'status': status.HTTP_403_FORBIDDEN,
+                    'message': 'Действие запрещено.'
+                }
+            )
+
+    # Переопределяем метод delete, чтобы проверить текущего пользователя
+    def destroy(self, request, *args, **kwargs):
+        comment = self.get_object()
+
+        # если текущий пользователь - хозяин профиля
+        if request.user == comment.user:
+            self.perform_destroy(comment)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        else:
+            return Response(
+                {
+                    'status': status.HTTP_403_FORBIDDEN,
+                    'message': 'Действие запрещено.',
                 }
             )
 
@@ -373,7 +423,7 @@ class VoteViewSet(viewsets.ModelViewSet):
 
         if serializer.is_valid():
             # получаем текущего пользователя
-            user = Profile.objects.filter(user__username=request.user.username)
+            user = Profile.objects.filter(username=request.user.username)
 
             # если пользователь авторизован
             if user.exists():
@@ -383,7 +433,6 @@ class VoteViewSet(viewsets.ModelViewSet):
                     {
                         'status': status.HTTP_400_BAD_REQUEST,
                         'message': 'Пользователь не найден.',
-                        'id': None
                     }
                 )
 
@@ -400,7 +449,6 @@ class VoteViewSet(viewsets.ModelViewSet):
                 {
                     'status': status.HTTP_400_BAD_REQUEST,
                     'message': 'Bad request',
-                    'id': None,
                     'serializer_errors': serializer.errors,
                 }
             )
@@ -410,38 +458,5 @@ class VoteViewSet(viewsets.ModelViewSet):
                 {
                     'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                     'message': 'Internal server error',
-                    'id': None,
                 }
             )
-
-    # Переопределяем метод patch, чтобы проверить текущего пользователя
-    # def partial_update(self, request, *args, **kwargs):
-    #     vote = self.get_object()
-    #
-    #     # если текущий пользователь - автор комментария
-    #     if request.user == vote.user.user:
-    #         vote.modified = datetime.datetime.now()
-    #         serializer = self.get_serializer(vote, data=request.data, partial=True)
-    #
-    #         if serializer.is_valid():
-    #             serializer.save()
-    #             return Response(
-    #                 {
-    #                     'state': '1',
-    #                     'message': 'Изменения успешно внесены.'
-    #                 }
-    #             )
-    #         else:
-    #             return Response(
-    #                 {
-    #                     'state': '0',
-    #                     'message': serializer.errors
-    #                 }
-    #             )
-    #     else:
-    #         return Response(
-    #             {
-    #                 'state': '0',
-    #                 'message': 'В изменении отказано.'
-    #             }
-    #         )
