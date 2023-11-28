@@ -1,7 +1,8 @@
-from django.core.validators import MinLengthValidator, MinValueValidator, MaxValueValidator
+from django.core.validators import MinLengthValidator, MinValueValidator, MaxValueValidator, FileExtensionValidator
 from django.db import models
-from django.db.models import Avg, Sum, Q
+from django.db.models import Avg, Q
 
+from .validators import validate_sql_injections, validate_size_image
 from profile.models import Profile
 from profile.models import get_image_path
 
@@ -16,7 +17,15 @@ class Ip(models.Model):
 
 # Модель для категорий
 class Category(models.Model):
-    name = models.CharField(max_length=32, unique=True, verbose_name='Название')
+    name = models.CharField(
+        max_length=32,
+        unique=True,
+        verbose_name='Название',
+        validators=[
+            MinLengthValidator(4),
+            validate_sql_injections
+        ],
+    )
     # subscribers = models.ManyToManyField(Profile, blank=True, related_name='categories', verbose_name='Подписчики')
 
     def __str__(self):
@@ -28,14 +37,32 @@ class Post(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     published = models.DateTimeField(blank=True, null=True, verbose_name='Дата публикации')
     modified = models.DateTimeField(blank=True, null=True, verbose_name='Дата изменения')
-    headline = models.CharField(verbose_name='Заголовок', max_length=254)
+    headline = models.CharField(
+        verbose_name='Заголовок',
+        max_length=254,
+        validators=[
+            MinLengthValidator(10),
+            validate_sql_injections
+        ],
+    )
     text = models.TextField(
         validators=[
-            MinLengthValidator(50, 'Это поле должно содержать минимум 50 символов')
+            MinLengthValidator(50),
+            validate_sql_injections
         ],
         verbose_name='Содержание',
     )
-    image = models.ImageField(blank=True, null=True, verbose_name='Изображение', upload_to=get_image_path)
+    image = models.ImageField(
+        blank=True,
+        null=True,
+        verbose_name='Изображение',
+        upload_to=get_image_path,
+        validators=[
+            FileExtensionValidator(allowed_extensions=['jpg', 'png']),
+            validate_size_image,
+            validate_sql_injections
+        ]
+    )
     is_published = models.BooleanField(default=False, verbose_name='Опубликован')
     rating = models.FloatField(default=0.0, verbose_name='Рейтинг')
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Автор')
@@ -82,15 +109,39 @@ class Post(models.Model):
 class Review(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     modified = models.DateTimeField(blank=True, null=True, verbose_name='Дата изменения')
-    headline = models.CharField(verbose_name='Заголовок', max_length=254)
+    headline = models.CharField(
+        verbose_name='Заголовок',
+        max_length=254,
+        validators=[
+            MinLengthValidator(10),
+            validate_sql_injections
+        ],
+    )
     text = models.TextField(
         validators=[
-            MinLengthValidator(20, 'Это поле должно содержать минимум 20 символов')
+            MinLengthValidator(20),
+            validate_sql_injections
         ],
         verbose_name='Содержание',
     )
-    rating = models.IntegerField(verbose_name='Оценка', validators=[MinValueValidator(1), MaxValueValidator(5)])
-    image = models.ImageField(blank=True, null=True, verbose_name='Изображение', upload_to=get_image_path)
+    rating = models.IntegerField(
+        verbose_name='Оценка',
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(5)
+        ]
+    )
+    image = models.ImageField(
+        blank=True,
+        null=True,
+        verbose_name='Изображение',
+        upload_to=get_image_path,
+        validators=[
+            FileExtensionValidator(allowed_extensions=['jpg', 'png']),
+            validate_size_image,
+            validate_sql_injections
+        ]
+    )
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Пользователь')
     post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name='Публикация')
 
@@ -119,7 +170,13 @@ class Review(models.Model):
 class Comment(models.Model):
     created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     modified = models.DateTimeField(blank=True, null=True, verbose_name='Дата изменения')
-    text = models.CharField(max_length=254, verbose_name='Комментарий')
+    text = models.CharField(
+        max_length=254,
+        verbose_name='Комментарий',
+        validators=[
+            validate_sql_injections
+        ]
+    )
     post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, verbose_name='Публикация')
     review = models.ForeignKey(Review, on_delete=models.CASCADE, blank=True, null=True, verbose_name='Отзыв')
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Пользователь')
