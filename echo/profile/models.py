@@ -1,5 +1,5 @@
 from PIL import Image
-from django.core.validators import FileExtensionValidator, MinLengthValidator
+from django.core.validators import FileExtensionValidator, MinLengthValidator, EmailValidator
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
@@ -59,6 +59,7 @@ class Profile(AbstractBaseUser):
         unique=True,
         validators=[
             MinLengthValidator(6),
+            EmailValidator,
             validate_sql_injections
         ],
     )
