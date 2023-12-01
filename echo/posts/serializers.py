@@ -23,7 +23,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True, allow_empty=False,
                                                   label='Категория')
-    image = serializers.URLField(label='URL изображения', allow_blank=True)
+    image = serializers.ImageField(label='Изображение', allow_null=True, use_url=True)
 
     class Meta:
         model = Post
@@ -34,6 +34,7 @@ class PostSerializer(serializers.ModelSerializer):
             'headline',
             'text',
             'image',
+            'rating',
             'category',
             'author',
         ]
@@ -47,11 +48,11 @@ class PostSerializer(serializers.ModelSerializer):
         # получаем данные публикации из валидатора
         categories = validated_data.pop('category')
         user = validated_data.pop('user')
-        headline = validated_data.pop('headline')
-        text = validated_data.pop('text')
-        image = validated_data.pop('image')
+        # headline = validated_data.pop('headline')
+        # text = validated_data.pop('text')
+        # image = validated_data.pop('image')
         # создаем публикацию
-        post = Post.objects.create(headline=headline, text=text, image=image, author=user)
+        post = Post.objects.create(**validated_data, author=user)
         # добавляем связи с категориями
         if categories:
             post.category.set(categories)

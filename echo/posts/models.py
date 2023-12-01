@@ -58,13 +58,13 @@ class Post(models.Model):
         verbose_name='Изображение',
         upload_to=get_image_path,
         validators=[
-            FileExtensionValidator(allowed_extensions=['jpg', 'png']),
+            FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
             validate_size_image,
             validate_sql_injections
         ]
     )
     is_published = models.BooleanField(default=False, verbose_name='Опубликован')
-    rating = models.FloatField(default=0.0, verbose_name='Рейтинг')
+    rating = models.FloatField(default=0.0, verbose_name='Оценка')
     author = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Автор')
     views = models.ManyToManyField(Ip, related_name='post_views', blank=True, verbose_name='Просмотры')
     # favourite = models.ManyToManyField(Profile, related_name='favourite_posts', blank=True, verbose_name='Избранное')
