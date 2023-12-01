@@ -109,7 +109,7 @@ class Profile(AbstractBaseUser):
         upload_to=get_image_path,
         verbose_name='Фотография',
         validators=[
-            FileExtensionValidator(allowed_extensions=['jpg', 'png']),
+            FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png']),
             validate_size_image,
             validate_sql_injections
             # OptionalSchemeURLValidator(),

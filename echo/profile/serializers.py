@@ -13,7 +13,7 @@ class ProfileSerializer(serializers.ModelSerializer):
                                                                label='Подписки на категории')
     subscribed_users = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(), many=True,
                                                           label='Подписки на пользователей')
-    image = serializers.URLField(label='URL фотографии', allow_blank=True)
+    image = serializers.ImageField(label='Фото', allow_null=True, use_url=True)
     hide_email = serializers.BooleanField(initial=True, label='Скрыть email')
 
     class Meta:
