@@ -1,0 +1,87 @@
+
+.fyp__doorContainer {
+    margin: 2.19rem 1.25rem;
+}
+.fyp__containerFeed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #C1ADFF;
+    border-radius: 2.5rem;
+    max-width: 20.93rem;
+    max-height: 2.6rem;
+    margin-left: 1.25rem;
+}
+.fypbtn.active {
+    background-color: #c1adff;
+    border-radius: 2.5rem;
+    width: 10.46rem;
+    height: 100%;
+    margin-top: 0;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+.fyp__door {
+    position: absolute;
+    z-index: 0;
+}
+.fyp__face {
+    position: absolute;
+    z-index: 1;
+    margin: 1.56rem 9.56rem ;
+}
+.explanation {
+    position: absolute;
+    font-family: Onest;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    margin-top: 7.36rem;
+    margin-left: 1.87rem;
+    max-width: 17.18rem;
+    text-align: center;
+    margin-bottom: 0.3rem;
+}
+.fyp__logInBtn {
+    position: absolute;
+    border-radius: 2.5rem;
+    background-color: #9A7CF7;
+    width: 17rem;
+    height: 2.8rem;
+    color: #ffffff;
+    margin-top: 12rem;
+    margin-left: 2rem;
+}
+.signUp > span {
+    font-family: Onest;
+    font-size: 0.875rem;
+    font-style: normal;
+    font-weight: 400;
+    position: absolute;
+    z-index: 1;
+    margin-top: 23.06rem;
+    margin-left: 7.74rem;
+}
+.fyp__VKbtn {
+    position: absolute;
+    border-radius: 2.5rem;
+    background-color: #9A7CF7;
+    width: 17rem;
+    height: 2.8rem;
+    color: #ffffff;
+    margin-top: 15.5rem;
+    margin-left: 2rem;
+}
+.signUp > button {
+    position: absolute;
+    z-index: 1;
+    border-radius: 2.5rem;
+    background-color: #F4F4F4;
+    border: 1px solid #484848;
+    width: 17rem;
+    height: 2.8rem;
+    color: #484848;
+    margin-top: 24.5rem;
+    margin-left: 3.42rem
+}

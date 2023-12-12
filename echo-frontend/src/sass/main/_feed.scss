@@ -1,0 +1,120 @@
+.feed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.container__feed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #C1ADFF;
+    border-radius: 2.5rem;
+    max-width: 20.93rem;
+    max-height: 2.6rem;
+}
+.subcontainer {
+    height: 2.5rem;
+    display: flex;
+
+}
+.fyp, .recsbtn {
+    margin-top: 0.7rem;
+}
+.fypbtn  > span {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.75rem 2.06rem;
+}
+.fyp > span {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.75rem 2.06rem;
+    margin-top: 0.7rem;
+}
+.recs>span {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.75rem 2.06rem;
+}
+
+.recs.active{
+    background-color: #C1ADFF;
+    border-radius: 2.5rem;
+    width: 10.46rem;
+}
+.recsbtn > span {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
+    padding: 0.75rem 2.06rem;
+    
+}
+
+.recsbtn.active{
+    background-color: #C1ADFF;
+    border-radius: 2.5rem;
+    width: 11.46rem;
+    margin-left: -1rem;
+    height: 100%;
+}
+.fyp.active {
+    background-color: #C1ADFF;
+    border-radius: 2.5rem;
+    width: 10.46rem;
+}
+.sort__dropList {
+    font-family: Roboto;
+    font-size: 0.9375rem;
+    font-style: normal;
+    font-weight: 500;
+    color: #1D192B;
+}
+.sort__dropList {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    padding-left: 4rem;
+    justify-content: center;
+    text-align: left;
+    width: 12.81rem;
+    height: 16.25rem;
+    border-radius: 1rem;
+    background-color: #F1F1F1;
+    margin-left: -8.5rem;
+    margin-top: 1rem;
+    z-index: 1;
+    list-style-type: disc;
+}
+.sort__dropList::before {
+    content: '';
+    position: absolute;
+    
+
+}
+.sort__dropSort {
+    font-family: Roboto;
+    font-size: 0.9375rem;
+    font-style: normal;
+    font-weight: 500;
+    margin-left: -1rem;
+    color:#49454F;
+}
+.sort__dropList>li {
+    font-size: 30px;
+}
+
+.sort{ 
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 0.875rem; 
+    margin-left: 2.2rem;
+    display: flex;
+    align-items: center;
+    margin-top: 0.94rem;
+}
+.sort>img {
+    padding-right: 0.65rem;
+}
